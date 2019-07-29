@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"encoding/json"
-
+	"os"
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
 )
@@ -14,11 +14,33 @@ type dataRecieve struct {
 }
 
 func Index(ctx *fasthttp.RequestCtx) {
-	var result interface{}
+	var result map[string]interface{}
+
 	// Unmarshal or Decode the JSON to the interface.
-	json.Unmarshal(ctx.PostBody(), &result)
-	str := fmt.Sprintf("%v", result)
-	fmt.Println(str)
+	json.Unmarshal([]byte(ctx.PostBody()), &result)
+	
+	empData, err := json.Marshal(result)   
+    if err != nil {
+        fmt.Println(err.Error())
+        return
+	}
+
+	jsonStr := string(empData)
+    fmt.Println("The JSON data is:")
+    fmt.Println(jsonStr)
+
+	
+	f, err := os.Create("test.json")
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    _, err = f.WriteString(jsonStr)
+    if err != nil {
+        fmt.Println(err)
+        f.Close()
+        return
+    }
 	ctx.WriteString("Welcome!")
 }
 
