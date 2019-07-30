@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"time"
 	"unsafe"
 
@@ -22,8 +23,10 @@ const (
 	DTYPE_OTHER
 )
 
+// TODO: add tag to json
 type dataPackage struct {
 	uuid             string
+	label            string
 	dateTimeReceived time.Time
 	dataSize         uintptr
 	dataType         int
@@ -48,7 +51,24 @@ func Index(ctx *fasthttp.RequestCtx) {
 	}
 
 	fmt.Println("The JSON data is:")
+
 	spew.Dump(dataStructure)
+	jsonStr := string(dataStructure)
+	fmt.Println("The JSON data is:")
+	fmt.Println(jsonStr)
+
+	f, err := os.Create("test.json")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	_, err = f.WriteString(jsonStr)
+	if err != nil {
+		fmt.Println(err)
+		f.Close()
+		return
+	}
+	ctx.WriteString("Welcome!")
 
 	ctx.WriteString("Welcome!")
 }
