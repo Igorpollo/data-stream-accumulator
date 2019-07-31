@@ -16,7 +16,15 @@ import (
 	logger "github.com/Igorpollo/go-custom-log"
 )
 
-var jsonChn = make(chan models.DataPackage, 5000)
+//switch do type (começar com json)
+//notificar quem tiver ouvindo a stream/ou tipo especifico em alguma URL
+//fechar o arquivo de x em x tempos
+//fechar o arquivo se ele alcançar um tamanho predefinido
+//enviar o arquivo fechado pro S3 (verificar se o S3 ja zipa gzip)
+//
+
+
+var jsonChn = make(chan models.DataPackage, 100000)
 
 const (
 	DTYPE_JSON = iota
@@ -42,6 +50,7 @@ func PutRecord(ctx *fasthttp.RequestCtx) {
 		UUID:             uuid.New(),
 	}
 	jsonChn <- dataStructure
+	
 
 	ctx.WriteString("Welcome!")
 
@@ -73,7 +82,7 @@ func createWriteJSONWorkers(noOfWorkers int) {
 }
 
 func main() {
-	go createWriteJSONWorkers(100)
+	go createWriteJSONWorkers(200)
 	r := router.New()
 	r.POST("/", PutRecord)
 	logger.Info("Started at port 8081")
