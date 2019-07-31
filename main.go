@@ -2,17 +2,20 @@ package main
 
 import (
 	"encoding/base64"
+	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"log"
-	"net"
 	"os"
 	"time"
-	"unsafe"
 
-	"github.com/davecgh/go-spew/spew"
+	"data-stream/models"
 	"github.com/fasthttp/router"
+	"github.com/google/uuid"
 	"github.com/valyala/fasthttp"
 )
+
+var jsonChn = make(chan models.DataPackage, 500)
 
 const (
 	DTYPE_JSON = iota
@@ -23,65 +26,55 @@ const (
 	DTYPE_OTHER
 )
 
-// TODO: add tag to json
-type dataPackage struct {
-	uuid             string
-	label            string
-	dateTimeReceived time.Time
-	dataSize         uintptr
-	dataType         int
-	data             string
-	ownerID          int
-	ip               net.IP
-}
-
-// asdfasdf
-func Index(ctx *fasthttp.RequestCtx) {
+// PutRecord recieve a single record
+func PutRecord(ctx *fasthttp.RequestCtx) {
 
 	dataBody := ctx.PostBody()
 
-	dataStructure := dataPackage{
-		dateTimeReceived: time.Now(),
-		dataSize:         unsafe.Sizeof(dataBody),
-		dataType:         DTYPE_JSON,
-		data:             base64.StdEncoding.EncodeToString(dataBody),
-		ownerID:          1,
-		ip:               ctx.RemoteIP(),
-		uuid:             "asdfçlkasjdf",
+	dataStructure := models.DataPackage{
+		DateTimeReceived: time.Now(),
+		DataSize:         binary.Size(dataBody),
+		DataType:         DTYPE_JSON,
+		Data:             base64.StdEncoding.EncodeToString(dataBody),
+		OwnerID:          1,
+		IP:               ctx.RemoteIP(),
+		UUID:             uuid.New(),
 	}
+	jsonChn <- dataStructure
 
-	fmt.Println("The JSON data is:")
-
-	spew.Dump(dataStructure)
-	jsonStr := string(dataStructure)
-	fmt.Println("The JSON data is:")
-	fmt.Println(jsonStr)
-
-	f, err := os.Create("test.json")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	_, err = f.WriteString(jsonStr)
-	if err != nil {
-		fmt.Println(err)
-		f.Close()
-		return
-	}
 	ctx.WriteString("Welcome!")
 
-	ctx.WriteString("Welcome!")
 }
 
-// asdf
-func Hello(ctx *fasthttp.RequestCtx) {
-	fmt.Fprintf(ctx, "Hello, %s!\n", ctx.UserValue("name"))
+func writeJSONWorker() {
+	for job := range jsonChn {
+		fmt.Println("recebi um job")
+		f, err := os.OpenFile("test.json", os.O_APPEND|os.O_WRONLY,os.ModePerm)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		jsonData, _ := json.Marshal(job)
+		jsonStr := string(jsonData)+"\n"
+		_, err = f.WriteString(jsonStr)
+		if err != nil {
+			fmt.Println(err)
+			f.Close()
+			return
+		}
+	}
+}
+
+func createWriteJSONWorkers(noOfWorkers int) {
+	for i := 0; i < noOfWorkers; i++ {
+		go writeJSONWorker()
+	}
 }
 
 func main() {
+	go createWriteJSONWorkers(1)
 	r := router.New()
-	r.POST("/", Index)
-	r.GET("/hello/:name", Hello)
+	r.POST("/", PutRecord)
 
 	log.Fatal(fasthttp.ListenAndServe(":8080", r.Handler))
 }
