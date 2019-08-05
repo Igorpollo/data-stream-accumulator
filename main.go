@@ -11,13 +11,16 @@ import (
 
 	"data-stream/models"
 
-	logger "github.com/Igorpollo/go-custom-log"
 	"github.com/fasthttp/router"
 	"github.com/google/uuid"
 	"github.com/valyala/fasthttp"
+
+	"net/http"
+
+	logger "github.com/Igorpollo/go-custom-log"
 )
 
-//switch do type (começar com json)
+//switch do type (começar com json) DONE
 //notificar quem tiver ouvindo a stream/ou tipo especifico em alguma URL
 //fechar o arquivo de x em x tempos
 //fechar o arquivo se ele alcançar um tamanho predefinido
@@ -72,9 +75,16 @@ func createWriteJSONWorkers(noOfWorkers int) {
 }
 
 func main() {
+
+	// web file server example
+	fs := http.FileServer(http.Dir("static/"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	go http.ListenAndServe(":3001", nil)
+
 	go createWriteJSONWorkers(200)
 	r := router.New()
 	r.POST("/", PutRecord)
 	logger.Info("Started at port 8081")
 	log.Fatal(fasthttp.ListenAndServe(":8081", r.Handler))
+
 }
