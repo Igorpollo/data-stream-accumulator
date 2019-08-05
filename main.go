@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -15,7 +15,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/valyala/fasthttp"
 
-	"net/http"
+	"github.com/davecgh/go-spew/spew"
+	"gopkg.in/yaml.v2"
 
 	logger "github.com/Igorpollo/go-custom-log"
 )
@@ -26,6 +27,15 @@ import (
 //fechar o arquivo se ele alcançar um tamanho predefinido
 //enviar o arquivo fechado pro S3 (verificar se o S3 ja zipa gzip)
 //
+
+type Config struct {
+	AccessKey struct {
+		Publickey  string
+		Privatekey string
+	}
+	Channels  []string
+	Consumers map[string][]string
+}
 
 var jsonChn = make(chan models.DataPackage, 100000)
 
@@ -65,7 +75,7 @@ func writeJSONWorker(f *os.File) {
 }
 
 func createWriteJSONWorkers(noOfWorkers int) {
-	f, err := os.OpenFile("test.json", os.O_APPEND|os.O_WRONLY, os.ModePerm)
+	f, err := os.OpenFile("data/test.json", os.O_APPEND|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
@@ -85,6 +95,17 @@ func main() {
 	r := router.New()
 	r.POST("/", PutRecord)
 	logger.Info("Started at port 8081")
-	log.Fatal(fasthttp.ListenAndServe(":8081", r.Handler))
+	go fasthttp.ListenAndServe(":8081", r.Handler)
+	// log.Fatal()
+
+	configData, _ := os.Open("./config.yml")
+	decoder := yaml.NewDecoder(configData)
+	config := Config{}
+	decoder.Decode(&config)
+
+	spew.Dump(config)
+
+	for {
+	}
 
 }

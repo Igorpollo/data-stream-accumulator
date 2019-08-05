@@ -1,0 +1,23 @@
+accesskey:
+  publickey: asdfkjaçskdjflkjadsf
+  privatekey: asdf12asdfasdf24sedfsdfsdf
+
+channels: 
+  - log 
+  - database 
+  - application
+
+consumers:
+  log:
+    - http://consume1.com
+    - http://consume2.com
+  database:
+    - http://consume2.com
+    - http://consume3.com
+    - http://consume4.com
+  application: 
+    - http://consume15.com
+
+
+# stream-processor:
+  
