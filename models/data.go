@@ -1,9 +1,19 @@
 package models
 
 import (
-	"github.com/google/uuid"
 	"net"
 	"time"
+
+	"github.com/google/uuid"
+)
+
+const (
+	DTYPE_JSON = iota
+	DTYPE_STRING
+	DTYPE_ARRAY_STRING
+	DTYPE_IMAGE
+	DTYPE_AUDIO
+	DTYPE_OTHER
 )
 
 // TODO: add tag to json
