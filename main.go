@@ -26,18 +26,10 @@ import (
 
 var jsonChn = make(chan models.DataPackage, 100000)
 
-const (
-	DTYPE_JSON = iota
-	DTYPE_STRING
-	DTYPE_ARRAY_STRING
-	DTYPE_IMAGE
-	DTYPE_AUDIO
-	DTYPE_OTHER
-)
 
 // PutRecord recieve a single record
 func PutRecord(ctx *fasthttp.RequestCtx) {
-
+	
 	dataBody := ctx.PostBody()
 
 	dataStructure := models.DataPackage{

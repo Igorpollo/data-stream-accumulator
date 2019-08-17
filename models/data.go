@@ -3,10 +3,27 @@ package models
 import (
 	"github.com/google/uuid"
 	"net"
+
+
+
+
+
+
+	
+
 	"time"
 )
 
-// TODO: add tag to json
+const (
+	DTYPE_JSON = iota
+	DTYPE_STRING
+	DTYPE_ARRAY_STRING
+	DTYPE_IMAGE
+	DTYPE_AUDIO
+	DTYPE_OTHER
+)
+
+
 type DataPackage struct {
 	UUID             uuid.UUID `json:"uuid"`
 	Label            string    `json:"label"`
