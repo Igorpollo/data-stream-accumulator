@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/google/uuid"
 	"net"
 
 
@@ -12,6 +11,17 @@ import (
 	
 
 	"time"
+
+	"github.com/google/uuid"
+)
+
+const (
+	DTYPE_JSON = iota
+	DTYPE_STRING
+	DTYPE_ARRAY_STRING
+	DTYPE_IMAGE
+	DTYPE_AUDIO
+	DTYPE_OTHER
 )
 
 const (
