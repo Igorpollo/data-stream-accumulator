@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"data-stream/models"
+	"github.com/Igorpollo/data-stream-accumulator/models"
 
 	"github.com/fasthttp/router"
 	"github.com/google/uuid"
@@ -86,6 +86,13 @@ func createWriteJSONWorkers(noOfWorkers int) {
 
 func main() {
 
+	configData, _ := os.Open("./config.yml")
+	decoder := yaml.NewDecoder(configData)
+	config := Config{}
+	decoder.Decode(&config)
+
+	spew.Dump(config)
+
 	// web file server example
 	fs := http.FileServer(http.Dir("static/"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
@@ -95,17 +102,8 @@ func main() {
 	r := router.New()
 	r.POST("/", PutRecord)
 	logger.Info("Started at port 8081")
-	go fasthttp.ListenAndServe(":8081", r.Handler)
+	fasthttp.ListenAndServe(":8081", r.Handler)
 	// log.Fatal()
 
-	configData, _ := os.Open("./config.yml")
-	decoder := yaml.NewDecoder(configData)
-	config := Config{}
-	decoder.Decode(&config)
-
-	spew.Dump(config)
-
-	for {
-	}
 
 }

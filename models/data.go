@@ -3,13 +3,6 @@ package models
 import (
 	"net"
 
-
-
-
-
-
-	
-
 	"time"
 
 	"github.com/google/uuid"
@@ -23,16 +16,6 @@ const (
 	DTYPE_AUDIO
 	DTYPE_OTHER
 )
-
-const (
-	DTYPE_JSON = iota
-	DTYPE_STRING
-	DTYPE_ARRAY_STRING
-	DTYPE_IMAGE
-	DTYPE_AUDIO
-	DTYPE_OTHER
-)
-
 
 type DataPackage struct {
 	UUID             uuid.UUID `json:"uuid"`
